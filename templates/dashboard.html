@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-green: #2e7d32;
+            --brand-green-dark: #256428;
+            --brand-green-light: #66bb6a;
+            --brand-amber: #f9a825;
+            --text-dark: #2c3e50;
+            --text-muted: #66788a;
+            --bg-page: #f4f8f4;
+        }
+
+        body {
+            background: var(--bg-page);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .disease-risk-alert {
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 0.92rem;
+        }
+
+        .disease-risk-alert.risk-high {
+            background: #fdecea;
+            border-left: 4px solid #c0392b;
+            color: #7a2c20;
+        }
+
+        .disease-risk-alert.risk-moderate {
+            background: #fff8e1;
+            border-left: 4px solid var(--brand-amber);
+            color: #7a5c00;
+        }
+
+        .disease-risk-alert.risk-low {
+            background: #eaf6ec;
+            border-left: 4px solid var(--brand-green-light);
+            color: #205723;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            margin: 0 5px;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white !important;
+        }
+        
+        .dashboard-container {
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .welcome-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+            opacity: 0.1;
+        }
+        
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--brand-green);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .recommendation-form {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+        
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .form-floating {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 12px 15px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            -moz-appearance: textfield;
+        }
+        
+        .form-control::-webkit-outer-spin-button,
+        .form-control::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .form-control[type=number] {
+            -moz-appearance: textfield;
+        }
+        
+        /* Soil Report Modal Styles */
+        .soil-report-sample {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .report-title {
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .report-subtitle {
+            color: #5a6c7d;
+            text-align: center;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .report-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+        }
+        
+        .highlighted-section {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+        }
+        
+        .highlight-row {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .highlight-value {
+            background: #ffc107;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #000;
+        }
+        
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+        
+        .was-validated .form-control:invalid {
+            border-color: #dc3545;
+        }
+        
+        .was-validated .form-control:invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        .form-control:focus {
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 0.2rem rgba(46, 204, 113, 0.25);
+        }
+        
+        .btn-predict {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-left: 4px solid var(--brand-green);
+        }
+        
+        .result-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .result-text {
+            font-size: 1.2rem;
+            color: var(--brand-green-dark);
+            font-weight: 600;
+        }
+        
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--brand-green-light) 0%, var(--brand-green) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .info-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .info-text {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 20px 15px;
+            }
+            
+            .welcome-section {
+                padding: 30px 20px;
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .recommendation-form {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-seedling me-2"></i>Crop Recommendation
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('history') }}">
+                            <i class="fas fa-history me-1"></i>History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('disease_detection') }}">
+                            <i class="fas fa-microscope me-1"></i>Disease Detection
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user-edit me-2"></i>Profile</a></li>
+                            {% if session.get('is_admin') %}
+                            <li><a class="dropdown-item" href="{{ url_for('admin_unknown_reports') }}"><i class="fas fa-flag me-2"></i>Unknown Disease Reports</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">Welcome back, {{ username }}! 👋</h1>
+            <p class="welcome-subtitle">Get personalized crop recommendations based on your soil and environmental conditions</p>
+        </div>
+
+        <!-- Disease Detection Quick Access Card -->
+        <div class="info-cards" style="margin-bottom: 40px;">
+            <div class="info-card" style="cursor: pointer;" onclick="window.location.href='{{ url_for('disease_detection') }}'">
+                <div class="info-icon" style="background: linear-gradient(135deg, var(--brand-amber) 0%, #c98a00 100%);">
+                    <i class="fas fa-microscope"></i>
+                </div>
+                <h3 class="info-title">Crop Disease Detection</h3>
+                <p class="info-text">Upload a leaf image to instantly detect diseases in Rice, Mango, Coconut, Cashew, Banana, or Sugarcane crops.</p>
+            </div>
+        </div>
+
+        <!-- Recommendation Form -->
+        <div class="recommendation-form">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="form-title mb-0">
+                    <i class="fas fa-leaf me-2"></i>Get Crop Recommendation
+                </h2>
+                <div>
+                    <button type="button" class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#soilReportModal">
+                        <i class="fas fa-file-alt me-2"></i>View Soil Report Sample
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="fetchWeatherData()">
+                        <i class="fas fa-cloud-sun me-2"></i>Get Current Weather
+                    </button>
+                </div>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form action="{{ url_for('predict') }}" method="POST" id="cropForm" novalidate>
+            <!-- Kokan Region Selector -->
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <strong>Location Required:</strong> Please select your Kokan region below to get accurate, location-specific crop recommendations for your area.
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select class="form-select" id="region" name="region" required>
+                            <option value="">Select your region...</option>
+                            <option value="ratnagiri">Ratnagiri</option>
+                            <option value="sindhudurg">Sindhudurg</option>
+                            <option value="mumbai">Mumbai</option>
+                            <option value="thane">Thane</option>
+                            <option value="palghar">Palghar</option>
+                        </select>
+                        <label for="region">
+                            <i class="fas fa-map-marker-alt me-2"></i>Select Kokan Region <span class="text-danger">*</span>
+                        </label>
+                        <div class="invalid-feedback">Please select your Kokan region to get accurate recommendations</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div id="weatherInfo" class="weather-info" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <span id="weatherDetails">Loading weather data...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommendation Location Selector -->
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-map-pin me-2"></i>
+                        <strong>Recommendation Location:</strong> Select the same location as above to get crop recommendations. Both locations must match.
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select class="form-select" id="recommendation_region" name="recommendation_region" required>
+                            <option value="">Select recommendation region...</option>
+                            <option value="ratnagiri">Ratnagiri</option>
+                            <option value="sindhudurg">Sindhudurg</option>
+                            <option value="mumbai">Mumbai</option>
+                            <option value="thane">Thane</option>
+                            <option value="palghar">Palghar</option>
+                        </select>
+                        <label for="recommendation_region">
+                            <i class="fas fa-map-pin me-2"></i>Recommendation Region <span class="text-danger">*</span>
+                        </label>
+                        <div class="invalid-feedback">Please select the same region as above for recommendations</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div id="locationMatch" class="alert" style="display: none;">
+                        <span id="locationMatchText"></span>
+                    </div>
+                </div>
+            </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="Nitrogen" name="Nitrogen" placeholder="Enter Nitrogen" min="0" max="500" step="0.1" required>
+                            <label for="Nitrogen">
+                                <i class="fas fa-vial me-2"></i>Nitrogen (N) <small class="text-muted">(0-500 kg/ha)</small>
+                            </label>
+                            <div class="invalid-feedback">Please enter a value between 0 and 500 kg/ha</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="Phosporus" name="Phosporus" placeholder="Enter Phosphorus" min="0" max="300" step="0.1" required>
+                            <label for="Phosporus">
+                                <i class="fas fa-vial me-2"></i>Phosphorus (P) <small class="text-muted">(0-300 kg/ha)</small>
+                            </label>
+                            <div class="invalid-feedback">Please enter a value between 0 and 300 kg/ha</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="Potassium" name="Potassium" placeholder="Enter Potassium" min="0" max="400" step="0.1" required>
+                            <label for="Potassium">
+                                <i class="fas fa-vial me-2"></i>Potassium (K) <small class="text-muted">(0-400 kg/ha)</small>
+                            </label>
+                            <div class="invalid-feedback">Please enter a value between 0 and 400 kg/ha</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="Temperature" name="Temperature" placeholder="Enter Temperature" min="15" max="45" step="0.1" required>
+                            <label for="Temperature">
+                                <i class="fas fa-thermometer-half me-2"></i>Temperature (°C) <small class="text-muted">(15-45°C)</small>
+                            </label>
+                            <div class="invalid-feedback">Please enter a temperature between 15°C and 45°C</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="Humidity" name="Humidity" placeholder="Enter Humidity" min="0" max="100" step="0.1" required>
+                            <label for="Humidity">
+                                <i class="fas fa-tint me-2"></i>Humidity (%) <small class="text-muted">(0-100%)</small>
+                            </label>
+                            <div class="invalid-feedback">Please enter humidity between 0% and 100%</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="Ph" name="Ph" placeholder="Enter pH value" min="1" max="14" step="0.1" required>
+                            <label for="Ph">
+                                <i class="fas fa-flask me-2"></i>pH Level <small class="text-muted">(1-14)</small>
+                            </label>
+                            <div class="invalid-feedback">Please enter a pH value between 1 and 14</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="Rainfall" name="Rainfall" placeholder="Enter Rainfall" min="0" max="4500" step="0.1" required>
+                            <label for="Rainfall">
+                                <i class="fas fa-cloud-rain me-2"></i>Rainfall (mm) <small class="text-muted">(0-4500 mm - Kokan region)</small>
+                            </label>
+                            <div class="invalid-feedback">Please enter a value between 0 and 4500 mm (Kokan region has very high rainfall)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="NPK_ratio" name="NPK_ratio" placeholder="NPK Ratio" readonly>
+                            <label for="NPK_ratio">
+                                <i class="fas fa-balance-scale me-2"></i>NPK Ratio <small class="text-success">(Auto-calculated)</small>
+                            </label>
+                            <div class="form-text">Automatically calculated from N, P, K values</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="temp_humidity_index" name="temp_humidity_index" placeholder="Temp-Humidity Index" readonly>
+                            <label for="temp_humidity_index">
+                                <i class="fas fa-chart-line me-2"></i>Temp-Humidity Index <small class="text-success">(Auto-calculated)</small>
+                            </label>
+                            <div class="form-text">THI = (Temp × 0.8) + (Humidity × 0.2)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="soil_fertility_score" name="soil_fertility_score" placeholder="Soil Fertility Score" readonly>
+                            <label for="soil_fertility_score">
+                                <i class="fas fa-seedling me-2"></i>Soil Fertility Score <small class="text-success">(Auto-calculated)</small>
+                            </label>
+                            <div class="form-text">Based on NPK values and pH level</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-12 text-center">
+                        <button type="submit" class="btn btn-predict">
+                            <i class="fas fa-magic me-2"></i>Get Recommendation
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Result Section -->
+        {% if result %}
+        <div class="result-card">
+            <div class="result-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3 class="result-title">Recommended Crop</h3>
+            <p class="result-text">{{ result }}</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Soil Report Sample Modal -->
+    <div class="modal fade" id="soilReportModal" tabindex="-1" aria-labelledby="soilReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="soilReportModalLabel">
+                        <i class="fas fa-file-alt me-2"></i>
+                        <strong>Government of Maharashtra</strong><br>
+                        <small>Soil Health Card - Kokan Region</small>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Government Report Header -->
+                    <div class="text-center mb-4">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_Maharashtra.svg/120px-Emblem_of_Maharashtra.svg.png" alt="Government Emblem" class="mb-2" style="height: 80px;">
+                        <h4 class="text-primary mb-1">Government of Maharashtra</h4>
+                        <h5 class="text-secondary mb-1">Department of Agriculture</h5>
+                        <h6 class="text-muted">Soil Health Card Scheme</h6>
+                    </div>
+                    
+                    <!-- Report Details -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td class="bg-light fw-bold">Report ID:</td>
+                                    <td>SHC/MH/2024/045678</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light fw-bold">Date of Issue:</td>
+                                    <td>15 March 2024</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light fw-bold">Valid Until:</td>
+                                    <td>14 March 2025</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td class="bg-light fw-bold">District:</td>
+                                    <td>Ratnagiri</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light fw-bold">Taluka:</td>
+                                    <td>Chiplun</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light fw-bold">Village:</td>
+                                    <td>Kondivade</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Farmer Information -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0"><i class="fas fa-user me-2"></i>Farmer Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Name:</strong> Shri Rajesh Patil<br>
+                                    <strong>Survey No:</strong> 45/2A<br>
+                                    <strong>Area:</strong> 2.5 Hectares
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Mobile:</strong> 9876543210<br>
+                                    <strong>Aadhaar:</strong> XXXX-XXXX-1234<br>
+                                    <strong>Soil Type:</strong> Lateritic Red Soil
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Crop Season:</strong> Kharif 2024<br>
+                                    <strong>Irrigation:</strong> Rainfed<br>
+                                    <strong>Slope:</strong> Gentle (2-5%)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Soil Test Results -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0"><i class="fas fa-flask me-2"></i>Soil Test Results</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Result</th>
+                                            <th>Optimal Range</th>
+                                            <th>Status</th>
+                                            <th>Where to Find in Form</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="highlight-n">
+                                            <td><strong>Nitrogen (N)</strong></td>
+                                            <td class="fw-bold text-success">245 kg/ha</td>
+                                            <td>200-400 kg/ha</td>
+                                            <td><span class="badge bg-success">Optimal</span></td>
+                                            <td><i class="fas fa-arrow-right text-primary"></i> <strong>Nitrogen (N)</strong> field</td>
+                                        </tr>
+                                        <tr class="highlight-p">
+                                            <td><strong>Phosphorus (P)</strong></td>
+                                            <td class="fw-bold text-warning">18 kg/ha</td>
+                                            <td>20-60 kg/ha</td>
+                                            <td><span class="badge bg-warning">Low</span></td>
+                                            <td><i class="fas fa-arrow-right text-primary"></i> <strong>Phosphorus (P)</strong> field</td>
+                                        </tr>
+                                        <tr class="highlight-k">
+                                            <td><strong>Potassium (K)</strong></td>
+                                            <td class="fw-bold text-success">195 kg/ha</td>
+                                            <td>150-300 kg/ha</td>
+                                            <td><span class="badge bg-success">Optimal</span></td>
+                                            <td><i class="fas fa-arrow-right text-primary"></i> <strong>Potassium (K)</strong> field</td>
+                                        </tr>
+                                        <tr class="highlight-ph">
+                                            <td><strong>pH Value</strong></td>
+                                            <td class="fw-bold text-success">6.8</td>
+                                            <td>6.0-7.5</td>
+                                            <td><span class="badge bg-success">Optimal</span></td>
+                                            <td><i class="fas fa-arrow-right text-primary"></i> <strong>pH</strong> field</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Organic Carbon (%)</strong></td>
+                                            <td>0.85%</td>
+                                            <td>0.5-1.0%</td>
+                                            <td><span class="badge bg-success">Good</span></td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Electrical Conductivity</strong></td>
+                                            <td>0.25 dS/m</td>
+                                            <td>< 0.8 dS/m</td>
+                                            <td><span class="badge bg-success">Safe</span></td>
+                                            <td>-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cost Information -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-rupee-sign me-2"></i>Soil Testing Cost Information (User Perspective)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-flask me-2"></i>Government Soil Testing Centers</h6>
+                                        <strong>Cost: ₹50-100 per sample</strong><br>
+                                        <small>• Available at Krishi Vigyan Kendras (KVK)</small><br>
+                                        <small>• District Agriculture Offices</small><br>
+                                        <small>• Results in 7-10 days</small><br>
+                                        <small>• Valid for 3 years</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-warning">
+                                        <h6><i class="fas fa-building me-2"></i>Private Laboratories</h6>
+                                        <strong>Cost: ₹300-800 per sample</strong><br>
+                                        <small>• Faster results (2-3 days)</small><br>
+                                        <small>• More detailed analysis</small><br>
+                                        <small>• Home collection available</small><br>
+                                        <small>• Online booking facilities</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <div class="alert alert-success">
+                                        <h6><i class="fas fa-info-circle me-2"></i>Recommended for Kokan Farmers</h6>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <strong>Basic Test (₹50-100):</strong><br>
+                                                • pH, N, P, K<br>
+                                                • Organic Carbon<br>
+                                                • EC (Electrical Conductivity)
+                                            </div>
+                                            <div class="col-md-4">
+                                                <strong>Standard Test (₹150-250):</strong><br>
+                                                • All Basic parameters<br>
+                                                • Micronutrients (Zn, Fe, Mn, Cu)<br>
+                                                • Soil texture analysis
+                                            </div>
+                                            <div class="col-md-4">
+                                                <strong>Comprehensive (₹300-500):</strong><br>
+                                                • All Standard parameters<br>
+                                                • Heavy metal testing<br>
+                                                • Water retention capacity
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <div class="alert alert-light">
+                                        <h6><i class="fas fa-map-marker-alt me-2"></i>Kokan Region Testing Centers</h6>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>Ratnagiri:</strong><br>
+                                                • KVK Ratnagiri<br>
+                                                • District Agri Office<br>
+                                                <small>₹75 per sample</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Sindhudurg:</strong><br>
+                                                • KVK Sindhudurg<br>
+                                                • Agri College, Sawantwadi<br>
+                                                <small>₹80 per sample</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Thane:</strong><br>
+                                                • KVK Thane<br>
+                                                • Agri Research Station<br>
+                                                <small>₹100 per sample</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Palghar:</strong><br>
+                                                • KVK Palghar<br>
+                                                • District Agri Office<br>
+                                                <small>₹70 per sample</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <div class="alert alert-primary">
+                                        <h6><i class="fas fa-calculator me-2"></i>Cost-Benefit Analysis</h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <strong>Investment:</strong> ₹100-500 per test<br>
+                                                <strong>Frequency:</strong> Once in 3 years<br>
+                                                <strong>Per hectare cost:</strong> ₹40-200/year
+                                            </div>
+                                            <div class="col-md-6">
+                                                <strong>Benefits:</strong><br>
+                                                • 15-25% yield increase<br>
+                                                • ₹5,000-15,000/ha additional income<br>
+                                                • Reduced fertilizer waste (₹2,000-4,000/ha)
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <strong>Return on Investment: 1000-2000% over 3 years</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fertilizer Recommendations -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-seedling me-2"></i>Fertilizer Recommendations</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="alert alert-success">
+                                        <strong>Urea:</strong> 120 kg/ha<br>
+                                        <small>Apply in 2 splits</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-warning">
+                                        <strong>DAP:</strong> 250 kg/ha<br>
+                                        <small>Basal application</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-info">
+                                        <strong>MOP:</strong> 80 kg/ha<br>
+                                        <small>Top dressing</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Official Signatures -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="border p-3">
+                                <p class="mb-1">_________________________</p>
+                                <small><strong>Sr. Soil Scientist</strong></small><br>
+                                <small>Soil Testing Laboratory</small><br>
+                                <small>Ratnagiri</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border p-3">
+                                <p class="mb-1">_________________________</p>
+                                <small><strong>Agriculture Officer</strong></small><br>
+                                <small>Department of Agriculture</small><br>
+                                <small>Kokan Region</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Government Seal -->
+                    <div class="text-center mt-3">
+                        <div class="d-inline-block border border-success p-2">
+                            <small class="text-success fw-bold">OFFICIAL SEAL</small><br>
+                            <small>Government of Maharashtra</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="printReport()">
+                        <i class="fas fa-print me-2"></i>Print Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-calculation functions
+        function calculateNPKRatio() {
+            const n = parseFloat(document.getElementById('Nitrogen').value) || 0;
+            const p = parseFloat(document.getElementById('Phosporus').value) || 0;
+            const k = parseFloat(document.getElementById('Potassium').value) || 0;
+            
+            // Calculate NPK ratio in standard format
+            const total = n + p + k;
+            if (total > 0) {
+                const nRatio = ((n / total) * 100).toFixed(1);
+                const pRatio = ((p / total) * 100).toFixed(1);
+                const kRatio = ((k / total) * 100).toFixed(1);
+                const ratio = `${nRatio}:${pRatio}:${kRatio}`;
+                document.getElementById('NPK_ratio').value = ratio;
+            } else {
+                document.getElementById('NPK_ratio').value = '0:0:0';
+            }
+        }
+        
+        function calculateTempHumidityIndex() {
+            const temp = parseFloat(document.getElementById('Temperature').value) || 0;
+            const humidity = parseFloat(document.getElementById('Humidity').value) || 0;
+            
+            // THI formula: (Temp × 0.8) + (Humidity × 0.2)
+            const thi = (temp * 0.8 + humidity * 0.2).toFixed(2);
+            document.getElementById('temp_humidity_index').value = thi;
+        }
+        
+        function calculateSoilFertilityScore() {
+            const n = parseFloat(document.getElementById('Nitrogen').value) || 0;
+            const p = parseFloat(document.getElementById('Phosporus').value) || 0;
+            const k = parseFloat(document.getElementById('Potassium').value) || 0;
+            const ph = parseFloat(document.getElementById('Ph').value) || 0;
+            
+            // Soil fertility score based on NPK values and pH
+            // Normalize NPK values (max expected: N=500, P=300, K=400)
+            const nScore = Math.min((n / 500) * 40, 40); // 40% weight
+            const pScore = Math.min((p / 300) * 30, 30); // 30% weight
+            const kScore = Math.min((k / 400) * 20, 20); // 20% weight
+            
+            // pH score (optimal range 6-7)
+            let phScore = 0;
+            if (ph >= 6 && ph <= 7) {
+                phScore = 10; // Perfect pH
+            } else if (ph >= 5.5 && ph <= 7.5) {
+                phScore = 8; // Good pH
+            } else if (ph >= 5 && ph <= 8) {
+                phScore = 5; // Acceptable pH
+            } else {
+                phScore = 2; // Poor pH
+            }
+            
+            const fertilityScore = (nScore + pScore + kScore + phScore).toFixed(2);
+            document.getElementById('soil_fertility_score').value = fertilityScore;
+        }
+        
+        // Build the disease-risk alert HTML from a disease_risk object
+        function buildDiseaseRiskHtml(risk) {
+            if (!risk) return '';
+            const levelClass = risk.level === 'High' ? 'risk-high' : (risk.level === 'Moderate' ? 'risk-moderate' : 'risk-low');
+            const diseaseList = risk.diseases && risk.diseases.length
+                ? `<div class="mt-1"><strong>Watch for:</strong> ${risk.diseases.join(', ')}</div>`
+                : '';
+            return `
+                <div class="disease-risk-alert ${levelClass} mt-2">
+                    <i class="fas fa-shield-virus me-2"></i>
+                    <strong>Disease Risk: ${risk.level}</strong>
+                    <div class="mt-1">${risk.advice}</div>
+                    ${diseaseList}
+                </div>
+            `;
+        }
+
+        // Update weather display function
+        function updateWeatherDisplay(data) {
+            const weatherDetails = document.getElementById('weatherDetails');
+            const weatherHtml = `
+                <div class="row">
+                    <div class="col-md-12">
+                        <strong>Current Weather in ${data.location}:</strong><br>
+                        🌡️ Temperature: ${data.temperature}°C <small class="text-success">(auto-filled)</small><br>
+                        💧 Humidity: ${data.humidity}% <small class="text-success">(auto-filled)</small><br>
+                        🌧️ Annual Rainfall: ${data.annual_rainfall}mm <small class="text-success">(auto-filled)</small><br>
+                        ☁️ Conditions: ${data.description}
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <strong>Regional Information:</strong><br>
+                        📊 Annual Avg Temp: ${data.avg_temp}°C<br>
+                        🌡️ Current Temp: ${data.temperature}°C<br>
+                        🔮 Forecast: ${data.forecast}<br>
+                        📅 Season: ${data.season}
+                    </div>
+                </div>
+                ${buildDiseaseRiskHtml(data.disease_risk)}
+            `;
+
+            weatherDetails.innerHTML = weatherHtml;
+        }
+
+        // Weather data fetching (manual fetch button)
+        function fetchWeatherData() {
+            const region = document.getElementById('region').value;
+            console.log('Manual weather fetch for region:', region); // Debug log
+            
+            if (!region) {
+                alert('Please select your Kokan region first to get weather data.');
+                return;
+            }
+            
+            const weatherInfo = document.getElementById('weatherInfo');
+            const weatherDetails = document.getElementById('weatherDetails');
+            
+            weatherInfo.style.display = 'block';
+            weatherDetails.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Fetching weather data...';
+            
+            fetch(`/get_weather/${region}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Weather data received:', data); // Debug log
+                    
+                    if (data.error) {
+                        weatherDetails.textContent = `Error: ${data.error}`;
+                    } else {
+                        // Check if locations match for auto-fill
+                        const recommendationRegion = document.getElementById('recommendation_region').value;
+                        
+                        if (region === recommendationRegion) {
+                            // Auto-fill if locations match
+                            document.getElementById('Temperature').value = data.temperature.toFixed(1);
+                            document.getElementById('Humidity').value = data.humidity;
+                            document.getElementById('Rainfall').value = data.annual_rainfall.toFixed(1);  // Use ANNUAL rainfall for crops
+                            
+                            // Trigger calculations
+                            calculateTempHumidityIndex();
+                            calculateSoilFertilityScore();
+                            
+                            // Update display with auto-fill indicators
+                            updateWeatherDisplay(data);
+                        } else {
+                            // Display as reference only if locations don't match
+                            const weatherHtml = `
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <strong>Current Weather in ${data.location}:</strong><br>
+                                        🌡️ Temperature: ${data.temperature}°C<br>
+                                        💧 Humidity: ${data.humidity}%<br>
+                                        🌧️ Annual Rainfall: ${data.annual_rainfall}mm<br>
+                                        ☁️ Conditions: ${data.description}
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <strong>Regional Information:</strong><br>
+                                        📊 Annual Avg Temp: ${data.avg_temp}°C<br>
+                                        🌡️ Current Temp: ${data.temperature}°C<br>
+                                        🔮 Forecast: ${data.forecast}<br>
+                                        📅 Season: ${data.season}
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <small class="text-muted">Note: Select the same region in both dropdowns to auto-fill these values.</small>
+                                    </div>
+                                </div>
+                                ${buildDiseaseRiskHtml(data.disease_risk)}
+                            `;
+
+                            weatherDetails.innerHTML = weatherHtml;
+                        }
+                    }
+                })
+                .catch(error => {
+                    weatherDetails.textContent = 'Failed to fetch weather data. Please try again.';
+                    console.error('Weather fetch error:', error);
+                });
+        }
+        
+        // Print report function
+        function printReport() {
+            const modalContent = document.querySelector('#soilReportModal .modal-body');
+            const printWindow = window.open('', '_blank');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Soil Health Card - Government of Maharashtra</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        .table-bordered { border: 1px solid #000; }
+                        .table-bordered td, .table-bordered th { border: 1px solid #000; padding: 8px; }
+                        .bg-light { background-color: #f8f9fa; }
+                        .text-center { text-align: center; }
+                        .fw-bold { font-weight: bold; }
+                        .mt-4 { margin-top: 2rem; }
+                        .mb-3 { margin-bottom: 1rem; }
+                        .card { border: 1px solid #000; margin-bottom: 1rem; }
+                        .card-header { background-color: #f8f9fa; border: 1px solid #000; padding: 8px; }
+                        .card-body { padding: 16px; }
+                        @media print { .no-print { display: none; } }
+                    </style>
+                </head>
+                <body>
+                    ${modalContent.innerHTML}
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }
+        
+        // Add event listeners for auto-calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            // NPK fields
+            document.getElementById('Nitrogen').addEventListener('input', calculateNPKRatio);
+            document.getElementById('Phosporus').addEventListener('input', calculateNPKRatio);
+            document.getElementById('Potassium').addEventListener('input', calculateNPKRatio);
+            
+            // Temperature and Humidity
+            document.getElementById('Temperature').addEventListener('input', calculateTempHumidityIndex);
+            document.getElementById('Humidity').addEventListener('input', calculateTempHumidityIndex);
+            
+            // Soil fertility score
+            document.getElementById('Nitrogen').addEventListener('input', calculateSoilFertilityScore);
+            document.getElementById('Phosporus').addEventListener('input', calculateSoilFertilityScore);
+            document.getElementById('Potassium').addEventListener('input', calculateSoilFertilityScore);
+            document.getElementById('Ph').addEventListener('input', calculateSoilFertilityScore);
+            
+            // Location matching validation with smart auto-fill
+            function checkLocationMatch() {
+                const weatherRegion = document.getElementById('region').value;
+                const recommendationRegion = document.getElementById('recommendation_region').value;
+                const locationMatch = document.getElementById('locationMatch');
+                const locationMatchText = document.getElementById('locationMatchText');
+                
+                if (weatherRegion && recommendationRegion) {
+                    locationMatch.style.display = 'block';
+                    if (weatherRegion === recommendationRegion) {
+                        locationMatch.className = 'alert alert-success';
+                        locationMatchText.innerHTML = '<i class="fas fa-check-circle me-2"></i>Locations match! Weather data will be auto-filled.';
+                        
+                        // Auto-fill weather data when locations match
+                        autoFillWeatherData(weatherRegion);
+                    } else {
+                        locationMatch.className = 'alert alert-warning';
+                        locationMatchText.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Locations do not match. Please select the same region for auto-fill.';
+                    }
+                } else {
+                    locationMatch.style.display = 'none';
+                }
+            }
+            
+            // Auto-fill weather data function
+            function autoFillWeatherData(region) {
+                fetch(`/get_weather/${region}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Weather data error:', data.error);
+                        } else {
+                            // Auto-fill form fields
+                            document.getElementById('Temperature').value = data.temperature.toFixed(1);
+                            document.getElementById('Humidity').value = data.humidity;
+                            document.getElementById('Rainfall').value = data.annual_rainfall.toFixed(1);  // Use ANNUAL rainfall for crops
+                            
+                            // Trigger calculations
+                            calculateTempHumidityIndex();
+                            calculateSoilFertilityScore();
+                            
+                            // Update weather display
+                            updateWeatherDisplay(data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Weather fetch error:', error);
+                    });
+            }
+            
+            // Add event listeners for location matching
+            document.getElementById('region').addEventListener('change', checkLocationMatch);
+            document.getElementById('recommendation_region').addEventListener('change', checkLocationMatch);
+            
+            // Form validation - simplified
+            const form = document.getElementById('cropForm');
+            form.addEventListener('submit', function(event) {
+                const weatherRegion = document.getElementById('region').value;
+                const recommendationRegion = document.getElementById('recommendation_region').value;
+                
+                console.log('Weather region:', weatherRegion);
+                console.log('Recommendation region:', recommendationRegion);
+                
+                // Only check if both regions are selected
+                if (!weatherRegion || !recommendationRegion) {
+                    event.preventDefault();
+                    alert('Please select both locations');
+                    return false;
+                }
+                
+                // Only check if they match
+                if (weatherRegion !== recommendationRegion) {
+                    event.preventDefault();
+                    alert('Both locations must match');
+                    return false;
+                }
+                
+                console.log('Form should submit now...');
+                // Let the form submit normally
+            });
+            
+            // Remove invalid state when region is changed
+            document.getElementById('region').addEventListener('change', function() {
+                this.classList.remove('is-invalid');
+                console.log('Region changed to:', this.value); // Debug log
+            });
+            
+            // Initialize calculations
+            calculateNPKRatio();
+            calculateTempHumidityIndex();
+            calculateSoilFertilityScore();
+        });
+    </script>
+</body>
+</html>

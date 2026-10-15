@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unknown Disease Reports - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-green: #2e7d32;
+            --brand-green-dark: #256428;
+            --brand-green-light: #66bb6a;
+            --brand-amber: #f9a825;
+            --text-dark: #2c3e50;
+            --text-muted: #66788a;
+            --bg-page: #f4f8f4;
+        }
+
+        body {
+            background: var(--bg-page);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            margin: 0 5px;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white !important;
+        }
+
+        .page-container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--brand-amber);
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .report-card.reviewed {
+            border-left: 4px solid var(--brand-green-light);
+            opacity: 0.85;
+        }
+
+        .report-thumb {
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        .report-body {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .report-meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .suggested-label {
+            background: #eaf6ec;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            color: #205723;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+        }
+
+        .btn-resolve {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-weight: 600;
+        }
+
+        .btn-resolve:hover {
+            color: white;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-seedling me-2"></i>Crop Recommendation
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('disease_detection') }}">
+                            <i class="fas fa-microscope me-1"></i>Disease Detection
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_unknown_reports') }}">
+                            <i class="fas fa-flag me-1"></i>Unknown Disease Reports
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user-edit me-2"></i>Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <div class="page-header">
+            <h1 class="page-title"><i class="fas fa-flag me-2"></i>Unknown Disease Reports</h1>
+            <p class="page-subtitle">Leaf images the model could not confidently classify. Review these to spot new or emerging diseases and grow the training dataset over time.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if reports %}
+            {% for report in reports %}
+            <div class="report-card {{ 'reviewed' if report['status'] == 'reviewed' else '' }}">
+                <img src="{{ '/' + report['image_path'] }}" alt="Reported leaf" class="report-thumb">
+                <div class="report-body">
+                    <div class="d-flex justify-content-between flex-wrap align-items-start">
+                        <div>
+                            <h5 class="mb-1">Report #{{ report['id'] }}</h5>
+                            <p class="report-meta mb-1">
+                                Submitted by <strong>{{ report['username'] }}</strong> on {{ report['created_at'] }}
+                            </p>
+                            <p class="report-meta mb-0">
+                                Model's closest guess: <strong>{{ report['predicted_class'] }}</strong>
+                                ({{ report['confidence'] }}% confidence)
+                            </p>
+                        </div>
+                        <span class="badge {{ 'bg-success' if report['status'] == 'reviewed' else 'bg-warning text-dark' }}">
+                            {{ report['status']|capitalize }}
+                        </span>
+                    </div>
+
+                    {% if report['user_suggested_label'] %}
+                    <div class="suggested-label">
+                        <i class="fas fa-comment-dots me-2"></i>
+                        <strong>User's guess:</strong> {{ report['user_suggested_label'] }}
+                    </div>
+                    {% else %}
+                    <p class="report-meta mt-2 mb-0"><em>No suggestion submitted by the user.</em></p>
+                    {% endif %}
+
+                    {% if report['status'] != 'reviewed' %}
+                    <form action="{{ url_for('resolve_unknown_report', report_id=report['id']) }}" method="POST" class="mt-3">
+                        <button type="submit" class="btn btn-resolve btn-sm">
+                            <i class="fas fa-check me-1"></i>Mark Reviewed
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-clipboard-check"></i>
+                <h3>No Unknown Reports</h3>
+                <p>Every prediction so far has met the confidence threshold. Low-confidence uploads will appear here automatically.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
